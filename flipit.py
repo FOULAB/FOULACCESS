@@ -125,6 +125,8 @@ class RACHandler( xml.sax.ContentHandler ):
         elif name == self.elements[2]:
             self.bool_cmdoutput = 'false'
 
+    def get_challenge(self):
+        return self.challenge
 
 
 class RAC( object ):
@@ -134,6 +136,8 @@ class RAC( object ):
                        'PASS' : pwd } 
         self._host = host
         
+        
+
         self._challenge = None
         self._sessionID = self.login()
 
@@ -207,6 +211,10 @@ class RAC( object ):
 
 
     def login( self ):
+        
+        XML_handler = RACHandler()
+        RC_handler = RCHandler()
+
         conn = httplib.HTTPSConnection( self._host )
 
         conn.putrequest( 'GET', '/cgi/challenge' )
@@ -245,7 +253,7 @@ class RAC( object ):
         # Phase 3. (of 3) Connecting with hashed password
         conn = httplib.HTTPSConnection(self._host)
 
-        conn.putrequest( 'GET', '/cgi/login?user={0}&hash={1}'.format( self.user, hash ) )
+        conn.putrequest( 'GET', '/cgi/login?user={0}&hash={1}'.format( self._auth['USER'], hash ) )
         conn.putheader( 'Cookie', 'sid=' + session_id )
         conn.putheader( 'User-Agent', 'Scali/1.0' )
         conn.endheaders()
